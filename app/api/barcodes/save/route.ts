@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
         args: [user.id, firma, barcodes.length],
       });
 
-      const transactionId = result.lastInsertRowid as number;
+      const transactionId = Number(result.lastInsertRowid);
 
       // Barkodları ekle
       for (const barcode of barcodes) {
