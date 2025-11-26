@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { getTabId, getTabRole, clearTabSession } from "@/lib/tab-session";
+import { getTabId, getTabRole, setTabRole, clearTabSession } from "@/lib/tab-session";
 
 interface AuthGuardProps {
   children: React.ReactNode;
