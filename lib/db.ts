@@ -99,6 +99,49 @@ export async function initDatabase() {
       });
     }
 
+    // Yeni admin kullanıcıları oluştur (eğer yoksa)
+    const adminUsers = [
+      { username: "hatipcoskun@verarkargo.com", password: "Ht1903.", name: "Hatip Bey" },
+      { username: "müsterihizmetleri@verarkargo.com", password: "müsteri34", name: "Müşteri Hizmetleri" },
+    ];
+
+    for (const admin of adminUsers) {
+      const adminCheck = await client.execute({
+        sql: "SELECT id FROM users WHERE username = ?",
+        args: [admin.username],
+      });
+
+      if (adminCheck.rows.length === 0) {
+        const hashedPassword = await bcrypt.hash(admin.password, 10);
+        await client.execute({
+          sql: "INSERT INTO users (username, password, role, name) VALUES (?, ?, ?, ?)",
+          args: [admin.username, hashedPassword, "admin", admin.name],
+        });
+      }
+    }
+
+    // Yeni kurye (depo) kullanıcıları oluştur (eğer yoksa)
+    const kuryeUsers = [
+      { username: "depo1@verarkargo.com", password: "Depo34.1", name: "Depo1" },
+      { username: "depo2@verarkargo.com", password: "Depo34.2", name: "Depo2" },
+      { username: "depo3@verarkargo.com", password: "Depo34.3", name: "Depo3" },
+    ];
+
+    for (const kurye of kuryeUsers) {
+      const kuryeCheck = await client.execute({
+        sql: "SELECT id FROM users WHERE username = ?",
+        args: [kurye.username],
+      });
+
+      if (kuryeCheck.rows.length === 0) {
+        const hashedPassword = await bcrypt.hash(kurye.password, 10);
+        await client.execute({
+          sql: "INSERT INTO users (username, password, role, name) VALUES (?, ?, ?, ?)",
+          args: [kurye.username, hashedPassword, "kurye", kurye.name],
+        });
+      }
+    }
+
     dbInitialized = true;
   } catch (error) {
     console.error("Database initialization error:", error);
