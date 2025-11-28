@@ -31,6 +31,14 @@ interface Kurye {
   username: string;
 }
 
+const FIRMALAR = [
+  "Aras Kargo",
+  "PTT",
+  "Yurtiçi",
+  "Sürat",
+  "Kargoist",
+];
+
 export default function DegisimKargoListesi({ user }: DegisimKargoListesiProps) {
   const router = useRouter();
   const [exchangeCargos, setExchangeCargos] = useState<ExchangeCargo[]>([]);
@@ -45,6 +53,10 @@ export default function DegisimKargoListesi({ user }: DegisimKargoListesiProps) 
   const [bitisTarihi, setBitisTarihi] = useState<string>("");
   const [baslangicSaati, setBaslangicSaati] = useState<string>("");
   const [bitisSaati, setBitisSaati] = useState<string>("");
+  const [aliciAdiArama, setAliciAdiArama] = useState<string>("");
+  const [selectedFirma, setSelectedFirma] = useState<string>("");
+  const [minDesi, setMinDesi] = useState<string>("");
+  const [maxDesi, setMaxDesi] = useState<string>("");
 
   useEffect(() => {
     loadExchangeCargos();
@@ -53,7 +65,7 @@ export default function DegisimKargoListesi({ user }: DegisimKargoListesiProps) 
 
   useEffect(() => {
     applyFilters();
-  }, [selectedKurye, baslangicTarihi, bitisTarihi, baslangicSaati, bitisSaati, allExchangeCargos]);
+  }, [selectedKurye, baslangicTarihi, bitisTarihi, baslangicSaati, bitisSaati, aliciAdiArama, selectedFirma, minDesi, maxDesi, allExchangeCargos]);
 
   const loadKuryeler = async () => {
     try {
@@ -91,6 +103,33 @@ export default function DegisimKargoListesi({ user }: DegisimKargoListesiProps) 
     // Kurye filtresi
     if (selectedKurye) {
       filtered = filtered.filter((c) => c.kurye_name === selectedKurye);
+    }
+
+    // Alıcı adı soyadı filtresi
+    if (aliciAdiArama.trim() !== "") {
+      filtered = filtered.filter((c) =>
+        c.alici_adi.toLowerCase().includes(aliciAdiArama.trim().toLowerCase())
+      );
+    }
+
+    // Kargo firması filtresi
+    if (selectedFirma) {
+      filtered = filtered.filter((c) => c.firma === selectedFirma);
+    }
+
+    // Desi filtresi
+    if (minDesi) {
+      const minDesiNum = parseFloat(minDesi);
+      if (!isNaN(minDesiNum)) {
+        filtered = filtered.filter((c) => c.desi >= minDesiNum);
+      }
+    }
+
+    if (maxDesi) {
+      const maxDesiNum = parseFloat(maxDesi);
+      if (!isNaN(maxDesiNum)) {
+        filtered = filtered.filter((c) => c.desi <= maxDesiNum);
+      }
     }
 
     // Tarih filtresi
@@ -142,6 +181,10 @@ export default function DegisimKargoListesi({ user }: DegisimKargoListesiProps) 
     setBitisTarihi("");
     setBaslangicSaati("");
     setBitisSaati("");
+    setAliciAdiArama("");
+    setSelectedFirma("");
+    setMinDesi("");
+    setMaxDesi("");
   };
 
   const handleDelete = async (cargoId: number) => {
@@ -216,6 +259,63 @@ export default function DegisimKargoListesi({ user }: DegisimKargoListesiProps) 
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Filtreler</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Alıcı Adı Soyadı
+              </label>
+              <input
+                type="text"
+                value={aliciAdiArama}
+                onChange={(e) => setAliciAdiArama(e.target.value)}
+                placeholder="Alıcı adı soyadı ile ara..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Kargo Firması
+              </label>
+              <select
+                value={selectedFirma}
+                onChange={(e) => setSelectedFirma(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+              >
+                <option value="">Tüm Firmalar</option>
+                {FIRMALAR.map((f) => (
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Min Desi
+              </label>
+              <input
+                type="number"
+                value={minDesi}
+                onChange={(e) => setMinDesi(e.target.value)}
+                placeholder="Min desi..."
+                min="0"
+                step="0.1"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Max Desi
+              </label>
+              <input
+                type="number"
+                value={maxDesi}
+                onChange={(e) => setMaxDesi(e.target.value)}
+                placeholder="Max desi..."
+                min="0"
+                step="0.1"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Kurye

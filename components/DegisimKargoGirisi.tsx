@@ -71,7 +71,7 @@ export default function DegisimKargoGirisi({ user }: DegisimKargoGirisiProps) {
           text: "Değişim kargosu başarıyla kaydedildi!",
         });
         setExchangeAlıcıAdı("");
-        setExchangeFirma("");
+        // Kargo firması seçimi korunuyor - sıfırlanmıyor
         setExchangeDesi("");
       } else {
         setMessage({ type: "error", text: data.error || "Kayıt başarısız" });

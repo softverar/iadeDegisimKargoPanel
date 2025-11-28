@@ -51,6 +51,7 @@ export default function IadeKargoListesi({ user }: IadeKargoListesiProps) {
   const [bitisTarihi, setBitisTarihi] = useState<string>("");
   const [baslangicSaati, setBaslangicSaati] = useState<string>("");
   const [bitisSaati, setBitisSaati] = useState<string>("");
+  const [barcodeSearch, setBarcodeSearch] = useState<string>("");
 
   useEffect(() => {
     loadTransactions();
@@ -60,6 +61,20 @@ export default function IadeKargoListesi({ user }: IadeKargoListesiProps) {
   useEffect(() => {
     applyFilters();
   }, [selectedKurye, baslangicTarihi, bitisTarihi, baslangicSaati, bitisSaati, allTransactions]);
+
+  useEffect(() => {
+    // Barkod araması için debounce ekle
+    const timeoutId = setTimeout(() => {
+      if (barcodeSearch.trim() !== "") {
+        searchByBarcode(barcodeSearch.trim());
+      } else {
+        // Barkod araması boşsa normal listeyi yükle
+        loadTransactions();
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [barcodeSearch]);
 
   const loadKuryeler = async () => {
     try {
@@ -86,6 +101,23 @@ export default function IadeKargoListesi({ user }: IadeKargoListesiProps) {
       }
     } catch (error) {
       console.error("Error loading transactions:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const searchByBarcode = async (barcode: string) => {
+    setLoading(true);
+    try {
+      const response = await apiFetch(`/api/transactions/list?barcode=${encodeURIComponent(barcode)}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setAllTransactions(data.transactions);
+        setTransactions(data.transactions);
+      }
+    } catch (error) {
+      console.error("Error searching by barcode:", error);
     } finally {
       setLoading(false);
     }
@@ -148,6 +180,7 @@ export default function IadeKargoListesi({ user }: IadeKargoListesiProps) {
     setBitisTarihi("");
     setBaslangicSaati("");
     setBitisSaati("");
+    setBarcodeSearch("");
   };
 
   const handleDelete = async (transactionId: number) => {
@@ -245,6 +278,18 @@ export default function IadeKargoListesi({ user }: IadeKargoListesiProps) {
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Filtreler</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="md:col-span-2 lg:col-span-3">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Barkod ile Ara
+              </label>
+              <input
+                type="text"
+                value={barcodeSearch}
+                onChange={(e) => setBarcodeSearch(e.target.value)}
+                placeholder="Barkod numarasını girin..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Kurye

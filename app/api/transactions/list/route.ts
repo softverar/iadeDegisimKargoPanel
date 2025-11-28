@@ -18,18 +18,45 @@ export async function GET(request: NextRequest) {
     // Veritabanını başlat (eğer henüz başlatılmadıysa)
     await initDatabase();
 
-    const result = await db.execute(`
-      SELECT 
-        t.id,
-        t.firma,
-        t.adet,
-        t.created_at,
-        u.name as kurye_name,
-        u.username as kurye_username
-      FROM transactions t
-      INNER JOIN users u ON t.user_id = u.id
-      ORDER BY t.created_at DESC
-    `);
+    // Barkod arama parametresini al
+    const { searchParams } = new URL(request.url);
+    const barcodeSearch = searchParams.get("barcode");
+
+    let result;
+    if (barcodeSearch && barcodeSearch.trim() !== "") {
+      // Barkod ile arama yap
+      result = await db.execute({
+        sql: `
+          SELECT DISTINCT
+            t.id,
+            t.firma,
+            t.adet,
+            t.created_at,
+            u.name as kurye_name,
+            u.username as kurye_username
+          FROM transactions t
+          INNER JOIN users u ON t.user_id = u.id
+          INNER JOIN barcodes b ON t.id = b.transaction_id
+          WHERE b.barcode LIKE ?
+          ORDER BY t.created_at DESC
+        `,
+        args: [`%${barcodeSearch.trim()}%`],
+      });
+    } else {
+      // Tüm transaction'ları getir
+      result = await db.execute(`
+        SELECT 
+          t.id,
+          t.firma,
+          t.adet,
+          t.created_at,
+          u.name as kurye_name,
+          u.username as kurye_username
+        FROM transactions t
+        INNER JOIN users u ON t.user_id = u.id
+        ORDER BY t.created_at DESC
+      `);
+    }
 
     const transactions = result.rows.map((row: any) => ({
       id: row.id,
