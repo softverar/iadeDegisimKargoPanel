@@ -62,6 +62,32 @@ export default function IadeKargoGirisi({ user }: IadeKargoGirisiProps) {
     }
   };
 
+  const playErrorBeep = () => {
+    try {
+      // Web Audio API ile olumsuz/uyarı sesi oluştur (düşük frekanslı, kısa)
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      // Düşük frekans (400 Hz) - olumsuz ses için
+      oscillator.frequency.value = 400;
+      oscillator.type = "sawtooth"; // Sawtooth wave daha sert bir ses verir
+
+      // Yüksek ses seviyesi ama kısa süre
+      gainNode.gain.setValueAtTime(0.7, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.15);
+    } catch (error) {
+      // Ses çalma hatası durumunda sessizce devam et
+      console.log("Ses çalınamadı:", error);
+    }
+  };
+
   const handleBarcodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedBarcode = barcodeInput.trim();
@@ -73,6 +99,10 @@ export default function IadeKargoGirisi({ user }: IadeKargoGirisiProps) {
     if (barcodes.includes(trimmedBarcode)) {
       setMessage({ type: "error", text: "Bu barkod zaten eklenmiş" });
       setBarcodeInput("");
+      
+      // Olumsuz ses çal (hata durumu)
+      playErrorBeep();
+      
       inputRef.current?.focus();
       return;
     }
