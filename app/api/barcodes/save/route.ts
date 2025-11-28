@@ -30,13 +30,14 @@ export async function POST(request: NextRequest) {
     // Önce veritabanında bu barkodların daha önce kaydedilip kaydedilmediğini kontrol et
     const duplicateBarcodes: string[] = [];
     for (const barcode of barcodes) {
+      const trimmedBarcode = String(barcode).trim();
       const existingBarcode = await db.execute({
         sql: "SELECT id FROM barcodes WHERE barcode = ?",
-        args: [barcode],
+        args: [trimmedBarcode],
       });
 
       if (existingBarcode.rows.length > 0) {
-        duplicateBarcodes.push(barcode);
+        duplicateBarcodes.push(trimmedBarcode);
       }
     }
 
@@ -64,11 +65,12 @@ export async function POST(request: NextRequest) {
 
       const transactionId = Number(result.lastInsertRowid);
 
-      // Barkodları ekle
+      // Barkodları ekle (trim edilmiş haliyle)
       for (const barcode of barcodes) {
+        const trimmedBarcode = String(barcode).trim();
         await transaction.execute({
           sql: "INSERT INTO barcodes (transaction_id, barcode) VALUES (?, ?)",
-          args: [transactionId, barcode],
+          args: [transactionId, trimmedBarcode],
         });
       }
 

@@ -180,9 +180,20 @@ export default function IadeKargoGirisi({ user }: IadeKargoGirisiProps) {
         setBarcodeInput("");
         inputRef.current?.focus();
       } else {
-        setMessage({ type: "error", text: data.error || "Kayıt başarısız" });
+        // Duplicate barkodlar varsa özel mesaj göster
+        if (data.duplicateBarcodes && data.duplicateBarcodes.length > 0) {
+          setMessage({ 
+            type: "error", 
+            text: `Bu barkodlar daha önce kaydedilmiş: ${data.duplicateBarcodes.join(", ")}` 
+          });
+          // Olumsuz ses çal
+          playErrorBeep();
+        } else {
+          setMessage({ type: "error", text: data.error || "Kayıt başarısız" });
+        }
       }
     } catch (error) {
+      console.error("Save error:", error);
       setMessage({ type: "error", text: "Bir hata oluştu. Lütfen tekrar deneyin." });
     } finally {
       setLoading(false);

@@ -28,9 +28,10 @@ export async function POST(request: NextRequest) {
     await initDatabase();
 
     // Veritabanında bu barkodun daha önce kaydedilip kaydedilmediğini kontrol et
+    const trimmedBarcode = String(barcode).trim();
     const existingBarcode = await db.execute({
       sql: "SELECT id FROM barcodes WHERE barcode = ?",
-      args: [barcode.trim()],
+      args: [trimmedBarcode],
     });
 
     const exists = existingBarcode.rows.length > 0;
