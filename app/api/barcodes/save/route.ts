@@ -27,6 +27,31 @@ export async function POST(request: NextRequest) {
     // Veritabanını başlat (eğer henüz başlatılmadıysa)
     await initDatabase();
 
+    // Önce veritabanında bu barkodların daha önce kaydedilip kaydedilmediğini kontrol et
+    const duplicateBarcodes: string[] = [];
+    for (const barcode of barcodes) {
+      const existingBarcode = await db.execute({
+        sql: "SELECT id FROM barcodes WHERE barcode = ?",
+        args: [barcode],
+      });
+
+      if (existingBarcode.rows.length > 0) {
+        duplicateBarcodes.push(barcode);
+      }
+    }
+
+    // Eğer duplicate barkodlar varsa hata döndür
+    if (duplicateBarcodes.length > 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Bu barkodlar daha önce kaydedilmiş: ${duplicateBarcodes.join(", ")}`,
+          duplicateBarcodes: duplicateBarcodes,
+        },
+        { status: 400 }
+      );
+    }
+
     // Transaction başlat
     const transaction = await db.transaction();
 

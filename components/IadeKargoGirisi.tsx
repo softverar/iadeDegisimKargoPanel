@@ -88,7 +88,7 @@ export default function IadeKargoGirisi({ user }: IadeKargoGirisiProps) {
     }
   };
 
-  const handleBarcodeSubmit = (e: React.FormEvent) => {
+  const handleBarcodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedBarcode = barcodeInput.trim();
 
@@ -96,6 +96,7 @@ export default function IadeKargoGirisi({ user }: IadeKargoGirisiProps) {
       return;
     }
 
+    // Önce mevcut listede kontrol et
     if (barcodes.includes(trimmedBarcode)) {
       setMessage({ type: "error", text: "Bu barkod zaten eklenmiş" });
       setBarcodeInput("");
@@ -107,6 +108,31 @@ export default function IadeKargoGirisi({ user }: IadeKargoGirisiProps) {
       return;
     }
 
+    // Veritabanında kontrol et
+    try {
+      const response = await apiFetch("/api/barcodes/check", {
+        method: "POST",
+        body: JSON.stringify({ barcode: trimmedBarcode }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.exists) {
+        setMessage({ type: "error", text: "Bu barkod daha önce kaydedilmiş" });
+        setBarcodeInput("");
+        
+        // Olumsuz ses çal (hata durumu)
+        playErrorBeep();
+        
+        inputRef.current?.focus();
+        return;
+      }
+    } catch (error) {
+      // Kontrol hatası durumunda da devam et (kullanıcı deneyimini bozmamak için)
+      console.error("Barkod kontrolü hatası:", error);
+    }
+
+    // Barkod hem listede yok hem de veritabanında yok, ekle
     setBarcodes([...barcodes, trimmedBarcode]);
     setBarcodeInput("");
     setMessage(null);
