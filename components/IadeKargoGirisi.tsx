@@ -64,24 +64,34 @@ export default function IadeKargoGirisi({ user }: IadeKargoGirisiProps) {
 
   const playErrorBeep = () => {
     try {
-      // Web Audio API ile olumsuz/uyarı sesi oluştur (düşük frekanslı, kısa)
+      // Web Audio API ile olumsuz/uyarı sesi oluştur (daha belirgin ve yüksek)
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
+      
+      // İki tonlu hata sesi - daha belirgin
+      const oscillator1 = audioContext.createOscillator();
+      const oscillator2 = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
 
-      oscillator.connect(gainNode);
+      oscillator1.connect(gainNode);
+      oscillator2.connect(gainNode);
       gainNode.connect(audioContext.destination);
 
-      // Düşük frekans (400 Hz) - olumsuz ses için
-      oscillator.frequency.value = 400;
-      oscillator.type = "sawtooth"; // Sawtooth wave daha sert bir ses verir
+      // Düşük frekans (300 Hz) - olumsuz ses için
+      oscillator1.frequency.value = 300;
+      oscillator1.type = "square";
+      
+      // Biraz daha yüksek frekans (350 Hz) - çift ton
+      oscillator2.frequency.value = 350;
+      oscillator2.type = "square";
 
-      // Yüksek ses seviyesi ama kısa süre
-      gainNode.gain.setValueAtTime(0.7, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+      // Yüksek ses seviyesi ve daha uzun süre
+      gainNode.gain.setValueAtTime(0.9, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.25);
 
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.15);
+      oscillator1.start(audioContext.currentTime);
+      oscillator2.start(audioContext.currentTime);
+      oscillator1.stop(audioContext.currentTime + 0.25);
+      oscillator2.stop(audioContext.currentTime + 0.25);
     } catch (error) {
       // Ses çalma hatası durumunda sessizce devam et
       console.log("Ses çalınamadı:", error);
