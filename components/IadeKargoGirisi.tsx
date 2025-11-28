@@ -38,7 +38,7 @@ export default function IadeKargoGirisi({ user }: IadeKargoGirisiProps) {
 
   const playBeep = () => {
     try {
-      // Web Audio API ile kısa bir beep sesi oluştur
+      // Web Audio API ile yüksek sesli ve baskın bir beep sesi oluştur
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
@@ -46,14 +46,16 @@ export default function IadeKargoGirisi({ user }: IadeKargoGirisiProps) {
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
 
-      oscillator.frequency.value = 800; // 800 Hz frekans
-      oscillator.type = "sine";
+      // Daha belirgin bir frekans (1000 Hz)
+      oscillator.frequency.value = 1000;
+      oscillator.type = "square"; // Square wave daha keskin ve belirgin bir ses verir
 
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+      // Daha yüksek ses seviyesi (0.8 gain = %80 ses)
+      gainNode.gain.setValueAtTime(0.8, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
 
       oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.1);
+      oscillator.stop(audioContext.currentTime + 0.2); // Biraz daha uzun süre
     } catch (error) {
       // Ses çalma hatası durumunda sessizce devam et
       console.log("Ses çalınamadı:", error);
