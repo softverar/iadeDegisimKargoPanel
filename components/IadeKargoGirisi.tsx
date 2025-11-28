@@ -36,6 +36,30 @@ export default function IadeKargoGirisi({ user }: IadeKargoGirisiProps) {
     inputRef.current?.focus();
   }, []);
 
+  const playBeep = () => {
+    try {
+      // Web Audio API ile kısa bir beep sesi oluştur
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.frequency.value = 800; // 800 Hz frekans
+      oscillator.type = "sine";
+
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.1);
+    } catch (error) {
+      // Ses çalma hatası durumunda sessizce devam et
+      console.log("Ses çalınamadı:", error);
+    }
+  };
+
   const handleBarcodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedBarcode = barcodeInput.trim();
@@ -54,6 +78,10 @@ export default function IadeKargoGirisi({ user }: IadeKargoGirisiProps) {
     setBarcodes([...barcodes, trimmedBarcode]);
     setBarcodeInput("");
     setMessage(null);
+    
+    // Barkod başarıyla eklendiğinde bildirim sesi çal
+    playBeep();
+    
     setTimeout(() => {
       inputRef.current?.focus();
     }, 10);
