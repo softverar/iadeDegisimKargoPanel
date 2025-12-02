@@ -49,7 +49,7 @@ export default function AdminPanel({ user }: AdminPanelProps) {
         </div>
 
         {/* Menü */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <button
             onClick={() => router.push("/admin/iade")}
             className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow text-left group"
@@ -81,6 +81,23 @@ export default function AdminPanel({ user }: AdminPanelProps) {
                 </p>
               </div>
               <div className="text-4xl">🔄</div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => router.push("/admin/sorunlu")}
+            className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow text-left group"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2 group-hover:text-red-600 transition-colors">
+                  Sorunlu Kargo Listesi
+                </h2>
+                <p className="text-gray-600">
+                  Sorunlu kargo kayıtlarını görüntüleyin ve yönetin
+                </p>
+              </div>
+              <div className="text-4xl">⚠️</div>
             </div>
           </button>
         </div>

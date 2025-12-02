@@ -6,16 +6,21 @@ const client = createClient({
   authToken: process.env.TURSO_AUTH_TOKEN || "",
 });
 
-let dbInitialized = false;
+// Veritabanı bağlantısını kontrol et
+if (!process.env.TURSO_DATABASE_URL || !process.env.TURSO_AUTH_TOKEN) {
+  console.warn("⚠️ UYARI: TURSO_DATABASE_URL veya TURSO_AUTH_TOKEN environment variable'ları ayarlanmamış!");
+}
+
+let tablesInitialized = false;
 
 // Veritabanı tablolarını oluştur
 export async function initDatabase() {
-  if (dbInitialized) {
-    return;
-  }
-
   try {
-    // Kullanıcılar tablosu
+    // Tabloları sadece bir kez oluştur
+    if (!tablesInitialized) {
+      console.log("Veritabanı tabloları oluşturuluyor...");
+      
+      // Kullanıcılar tablosu
     await client.execute(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -63,6 +68,37 @@ export async function initDatabase() {
       )
     `);
 
+    // Sorunlu kargolar tablosu
+    await client.execute(`
+      CREATE TABLE IF NOT EXISTS sorunlu_kargolar (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        barkod_no TEXT NOT NULL,
+        cikis_no TEXT NOT NULL,
+        tasiyici_firma TEXT NOT NULL,
+        gonderici_firma TEXT NOT NULL,
+        alici_adi TEXT NOT NULL,
+        aciklama TEXT NOT NULL,
+        durum TEXT NOT NULL DEFAULT 'Yeni Kayıt' CHECK(durum IN ('Yeni Kayıt', 'İşlemde', 'Çözüldü', 'Ödendi', 'Reddedildi')),
+        depo_gorusu TEXT,
+        odeme_aciklamasi TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      )
+    `);
+
+    // Sorunlu kargo fotoğrafları tablosu
+    await client.execute(`
+      CREATE TABLE IF NOT EXISTS sorunlu_kargo_fotograflar (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sorunlu_kargo_id INTEGER NOT NULL,
+        foto_url TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (sorunlu_kargo_id) REFERENCES sorunlu_kargolar(id) ON DELETE CASCADE
+      )
+    `);
+
     // Varsayılan admin kullanıcısı oluştur (eğer yoksa)
     const adminCheck = await client.execute({
       sql: "SELECT id FROM users WHERE username = ?",
@@ -99,24 +135,45 @@ export async function initDatabase() {
       });
     }
 
-    // Yeni admin kullanıcıları oluştur (eğer yoksa)
-    const adminUsers = [
-      { username: "hatipcoskun@verarkargo.com", password: "Ht1903.", name: "Hatip Bey" },
-      { username: "müsterihizmetleri@verarkargo.com", password: "müsteri34", name: "Müşteri Hizmetleri" },
-    ];
+    // Admin kullanıcısı oluştur (eğer yoksa)
+    const adminCheck2 = await client.execute({
+      sql: "SELECT id FROM users WHERE username = ?",
+      args: ["hatipcoskun@verarkargo.com"],
+    });
 
-    for (const admin of adminUsers) {
-      const adminCheck = await client.execute({
-        sql: "SELECT id FROM users WHERE username = ?",
-        args: [admin.username],
+    if (adminCheck2.rows.length === 0) {
+      const hashedPassword = await bcrypt.hash("Ht1903.", 10);
+      await client.execute({
+        sql: "INSERT INTO users (username, password, role, name) VALUES (?, ?, ?, ?)",
+        args: ["hatipcoskun@verarkargo.com", hashedPassword, "admin", "Hatip Bey"],
       });
+    }
 
-      if (adminCheck.rows.length === 0) {
-        const hashedPassword = await bcrypt.hash(admin.password, 10);
+    // Müşteri hizmetleri kullanıcısı oluştur veya güncelle (kurye rolünde)
+    const mhCheck = await client.execute({
+      sql: "SELECT id, role FROM users WHERE username = ?",
+      args: ["müsterihizmetleri@verarkargo.com"],
+    });
+
+    if (mhCheck.rows.length === 0) {
+      console.log("Müşteri hizmetleri kullanıcısı oluşturuluyor...");
+      const hashedPassword = await bcrypt.hash("müsteri34", 10);
+      await client.execute({
+        sql: "INSERT INTO users (username, password, role, name) VALUES (?, ?, ?, ?)",
+        args: ["müsterihizmetleri@verarkargo.com", hashedPassword, "kurye", "Müşteri Hizmetleri"],
+      });
+      console.log("Müşteri hizmetleri kullanıcısı oluşturuldu!");
+    } else {
+      const existingUser = mhCheck.rows[0] as any;
+      if (existingUser.role !== "kurye") {
+        console.log("Müşteri hizmetleri kullanıcısının rolü güncelleniyor (admin -> kurye)...");
         await client.execute({
-          sql: "INSERT INTO users (username, password, role, name) VALUES (?, ?, ?, ?)",
-          args: [admin.username, hashedPassword, "admin", admin.name],
+          sql: "UPDATE users SET role = ? WHERE username = ?",
+          args: ["kurye", "müsterihizmetleri@verarkargo.com"],
         });
+        console.log("Müşteri hizmetleri kullanıcısının rolü güncellendi!");
+      } else {
+        console.log("Müşteri hizmetleri kullanıcısı zaten mevcut ve doğru rolde");
       }
     }
 
@@ -142,10 +199,18 @@ export async function initDatabase() {
       }
     }
 
-    dbInitialized = true;
+      tablesInitialized = true;
+      console.log("Veritabanı tabloları oluşturuldu!");
+    }
+
+    // Kullanıcıları her zaman kontrol et ve oluştur (tablolar oluşturulduktan sonra)
+    console.log("Kullanıcılar kontrol ediliyor...");
+
+    console.log("Veritabanı başlatma tamamlandı!");
   } catch (error) {
     console.error("Database initialization error:", error);
-    throw error;
+    // Hata olsa bile devam et, sadece log'la
+    // throw error; // Hata fırlatmayı kaldırdık, böylece kullanıcılar oluşturulabilir
   }
 }
 

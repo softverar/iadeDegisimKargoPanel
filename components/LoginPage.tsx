@@ -73,6 +73,8 @@ export default function LoginPage() {
 
       const data = await response.json();
 
+      console.log("Login response:", data);
+
       if (data.success) {
         // Tab role'ü kaydet
         setTabRole(loginType);
@@ -84,9 +86,11 @@ export default function LoginPage() {
         }
         router.refresh();
       } else {
+        console.error("Login error:", data.error);
         setError(data.error || "Giriş başarısız");
       }
     } catch (err) {
+      console.error("Login catch error:", err);
       setError("Bir hata oluştu. Lütfen tekrar deneyin.");
     } finally {
       setLoading(false);

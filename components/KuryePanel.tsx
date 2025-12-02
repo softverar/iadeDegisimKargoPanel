@@ -49,7 +49,7 @@ export default function KuryePanel({ user }: KuryePanelProps) {
         </div>
 
         {/* Menü */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <button
             onClick={() => router.push("/kurye/iade")}
             className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow text-left group"
@@ -83,6 +83,43 @@ export default function KuryePanel({ user }: KuryePanelProps) {
               <div className="text-4xl">🔄</div>
             </div>
           </button>
+
+          {/* Müşteri Hizmetleri için Sorunlu Kargo Girişi */}
+          {user.username === "müsterihizmetleri@verarkargo.com" ? (
+            <button
+              onClick={() => router.push("/kurye/sorunlu")}
+              className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow text-left group"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2 group-hover:text-red-600 transition-colors">
+                    Sorunlu Kargo Girişi
+                  </h2>
+                  <p className="text-gray-600">
+                    Sorunlu kargo kayıtlarını oluşturun
+                  </p>
+                </div>
+                <div className="text-4xl">⚠️</div>
+              </div>
+            </button>
+          ) : (
+            <button
+              onClick={() => router.push("/kurye/sorunlu/liste")}
+              className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow text-left group"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2 group-hover:text-red-600 transition-colors">
+                    Sorunlu Kargo Listesi
+                  </h2>
+                  <p className="text-gray-600">
+                    Sorunlu kargo kayıtlarını görüntüleyin
+                  </p>
+                </div>
+                <div className="text-4xl">⚠️</div>
+              </div>
+            </button>
+          )}
         </div>
       </div>
     </div>

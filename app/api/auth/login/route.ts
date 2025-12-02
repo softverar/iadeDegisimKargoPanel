@@ -5,6 +5,8 @@ export async function POST(request: NextRequest) {
   try {
     const { username, password, role, tabId } = await request.json();
 
+    console.log("Login attempt:", { username, role, hasPassword: !!password });
+
     if (!username || !password || !role) {
       return NextResponse.json(
         { success: false, error: "Kullanıcı adı, şifre ve rol gereklidir" },
@@ -13,6 +15,8 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await login(username, password, role, tabId);
+
+    console.log("Login result:", { success: result.success, error: result.error });
 
     if (result.success) {
       return NextResponse.json(result);
