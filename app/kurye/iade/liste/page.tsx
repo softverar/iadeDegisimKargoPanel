@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { getTabId, setTabRole } from "@/lib/tab-session";
 import { apiFetch } from "@/lib/api-client";
-import SorunluKargoDetay from "@/components/SorunluKargoDetay";
+import IadeKargoListesi from "@/components/IadeKargoListesi";
 
 interface User {
   id: number;
@@ -13,9 +13,8 @@ interface User {
   name: string;
 }
 
-export default function AdminSorunluKargoDetayPage() {
+export default function IadeKargoListePage() {
   const router = useRouter();
-  const params = useParams();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -29,11 +28,16 @@ export default function AdminSorunluKargoDetayPage() {
         const data = await response.json();
 
         if (data.success && data.user) {
-          if (data.user.role !== "admin") {
+          if (data.user.role !== "kurye") {
+            router.push("/admin");
+            return;
+          }
+          // Müşteri hizmetleri kontrolü - sadece müşteri hizmetleri bu sayfaya erişebilir
+          if (data.user.username !== "müsterihizmetleri@verarkargo.com") {
             router.push("/kurye");
             return;
           }
-          setTabRole("admin");
+          setTabRole("kurye");
           setUser(data.user);
         } else {
           router.push("/");
@@ -59,9 +63,6 @@ export default function AdminSorunluKargoDetayPage() {
     );
   }
 
-  const sorunluKargoId = parseInt(params.id as string);
-
-  return <SorunluKargoDetay user={user} sorunluKargoId={sorunluKargoId} />;
+  return <IadeKargoListesi user={user} />;
 }
-
 

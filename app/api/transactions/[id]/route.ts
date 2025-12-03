@@ -11,7 +11,8 @@ export async function GET(
     const tabId = request.headers.get("x-tab-id");
     const user = await getCurrentUser(tabId || undefined);
 
-    if (!user || user.role !== "admin") {
+    // Admin veya müşteri hizmetleri erişebilir
+    if (!user || (user.role !== "admin" && user.username !== "müsterihizmetleri@verarkargo.com")) {
       return NextResponse.json(
         { success: false, error: "Yetkisiz erişim" },
         { status: 403 }

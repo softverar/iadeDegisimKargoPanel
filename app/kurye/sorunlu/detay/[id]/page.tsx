@@ -64,3 +64,4 @@ export default function SorunluKargoDetayPage() {
   return <SorunluKargoDetay user={user} sorunluKargoId={sorunluKargoId} />;
 }
 
+

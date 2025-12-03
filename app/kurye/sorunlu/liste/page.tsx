@@ -61,3 +61,4 @@ export default function SorunluKargoListePage() {
   return <SorunluKargoListesi user={user} />;
 }
 
+

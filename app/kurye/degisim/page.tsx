@@ -32,6 +32,11 @@ export default function DegisimKargoPage() {
             router.push("/admin");
             return;
           }
+          // Müşteri hizmetleri kullanıcısı giriş sayfasına erişemez, listeye yönlendir
+          if (data.user.username === "müsterihizmetleri@verarkargo.com") {
+            router.push("/kurye/degisim/liste");
+            return;
+          }
           setTabRole("kurye");
           setUser(data.user);
         } else {

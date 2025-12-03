@@ -265,7 +265,7 @@ export default function IadeKargoListesi({ user }: IadeKargoListesiProps) {
                 Yenile
               </button>
               <button
-                onClick={() => router.push("/admin")}
+                onClick={() => router.push(user.role === "admin" ? "/admin" : "/kurye")}
                 className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
               >
                 Ana Menü

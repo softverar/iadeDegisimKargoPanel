@@ -61,3 +61,4 @@ export default function AdminSorunluKargoPage() {
   return <SorunluKargoAdminListesi user={user} />;
 }
 
+

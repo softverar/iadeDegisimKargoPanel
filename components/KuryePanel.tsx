@@ -50,39 +50,79 @@ export default function KuryePanel({ user }: KuryePanelProps) {
 
         {/* Menü */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <button
-            onClick={() => router.push("/kurye/iade")}
-            className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow text-left group"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors">
-                  İade Kargo Girişi
-                </h2>
-                <p className="text-gray-600">
-                  İade kargolarının barkodlarını okutun ve kaydedin
-                </p>
+          {/* İade Kargo - Müşteri Hizmetleri için Liste, Depo için Giriş */}
+          {user.username === "müsterihizmetleri@verarkargo.com" ? (
+            <button
+              onClick={() => router.push("/kurye/iade/liste")}
+              className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow text-left group"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors">
+                    İade Kargo Listesi
+                  </h2>
+                  <p className="text-gray-600">
+                    İade kargolarının listesini görüntüleyin
+                  </p>
+                </div>
+                <div className="text-4xl">📦</div>
               </div>
-              <div className="text-4xl">📦</div>
-            </div>
-          </button>
+            </button>
+          ) : (
+            <button
+              onClick={() => router.push("/kurye/iade")}
+              className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow text-left group"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors">
+                    İade Kargo Girişi
+                  </h2>
+                  <p className="text-gray-600">
+                    İade kargolarının barkodlarını okutun ve kaydedin
+                  </p>
+                </div>
+                <div className="text-4xl">📦</div>
+              </div>
+            </button>
+          )}
 
-          <button
-            onClick={() => router.push("/kurye/degisim")}
-            className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow text-left group"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2 group-hover:text-purple-600 transition-colors">
-                  Değişim Kargo Girişi
-                </h2>
-                <p className="text-gray-600">
-                  Değişim kargolarının bilgilerini girin ve kaydedin
-                </p>
+          {/* Değişim Kargo - Müşteri Hizmetleri için Liste, Depo için Giriş */}
+          {user.username === "müsterihizmetleri@verarkargo.com" ? (
+            <button
+              onClick={() => router.push("/kurye/degisim/liste")}
+              className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow text-left group"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2 group-hover:text-purple-600 transition-colors">
+                    Değişim Kargo Listesi
+                  </h2>
+                  <p className="text-gray-600">
+                    Değişim kargolarının listesini görüntüleyin
+                  </p>
+                </div>
+                <div className="text-4xl">🔄</div>
               </div>
-              <div className="text-4xl">🔄</div>
-            </div>
-          </button>
+            </button>
+          ) : (
+            <button
+              onClick={() => router.push("/kurye/degisim")}
+              className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow text-left group"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2 group-hover:text-purple-600 transition-colors">
+                    Değişim Kargo Girişi
+                  </h2>
+                  <p className="text-gray-600">
+                    Değişim kargolarının bilgilerini girin ve kaydedin
+                  </p>
+                </div>
+                <div className="text-4xl">🔄</div>
+              </div>
+            </button>
+          )}
 
           {/* Müşteri Hizmetleri için Sorunlu Kargo Girişi */}
           {user.username === "müsterihizmetleri@verarkargo.com" ? (
