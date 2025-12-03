@@ -47,6 +47,7 @@ export default function SorunluKargoDetay({ user, sorunluKargoId }: SorunluKargo
   const [depoGorusu, setDepoGorusu] = useState("");
   const [savingDepoGorusu, setSavingDepoGorusu] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [selectedFoto, setSelectedFoto] = useState<string | null>(null);
   
   // Depo kullanıcısı mı kontrolü (müşteri hizmetleri değil)
   const isDepoUser = user.role === "kurye" && user.username !== "müsterihizmetleri@verarkargo.com";
@@ -107,7 +108,8 @@ export default function SorunluKargoDetay({ user, sorunluKargoId }: SorunluKargo
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("tr-TR", {
+    return date.toLocaleString("tr-TR", {
+      timeZone: "Europe/Istanbul",
       day: "2-digit",
       month: "long",
       year: "numeric",
@@ -253,14 +255,67 @@ export default function SorunluKargoDetay({ user, sorunluKargoId }: SorunluKargo
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {fotograflar.map((foto) => (
-                <img
+                <div
                   key={foto.id}
-                  src={foto.foto_url}
-                  alt={`Fotoğraf ${foto.id}`}
-                  className="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-80"
-                  onClick={() => window.open(foto.foto_url, "_blank")}
-                />
+                  className="relative group cursor-pointer"
+                  onClick={() => setSelectedFoto(foto.foto_url)}
+                >
+                  <img
+                    src={foto.foto_url}
+                    alt={`Fotoğraf ${foto.id}`}
+                    className="w-full h-48 object-cover rounded-lg transition-opacity group-hover:opacity-80"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded-lg transition-all duration-200 flex items-center justify-center">
+                    <button
+                      className="opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full p-3 shadow-lg hover:scale-110 transform transition-transform"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedFoto(foto.foto_url);
+                      }}
+                      title="Büyüt"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-8 w-8 text-gray-800"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Fotoğraf Büyütme Modal */}
+        {selectedFoto && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4"
+            onClick={() => setSelectedFoto(null)}
+          >
+            <div className="relative max-w-7xl max-h-full">
+              <button
+                onClick={() => setSelectedFoto(null)}
+                className="absolute -top-12 right-0 text-white hover:text-gray-300 text-4xl font-bold"
+                title="Kapat"
+              >
+                ×
+              </button>
+              <img
+                src={selectedFoto}
+                alt="Büyütülmüş fotoğraf"
+                className="max-w-full max-h-[90vh] object-contain rounded-lg"
+                onClick={(e) => e.stopPropagation()}
+              />
             </div>
           </div>
         )}

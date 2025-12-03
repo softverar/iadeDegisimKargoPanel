@@ -195,7 +195,7 @@ export async function DELETE(
     const tabId = request.headers.get("x-tab-id");
     const user = await getCurrentUser(tabId || undefined);
 
-    if (!user || user.role !== "admin") {
+    if (!user) {
       return NextResponse.json(
         { success: false, error: "Yetkisiz erişim" },
         { status: 403 }
@@ -206,6 +206,38 @@ export async function DELETE(
 
     // Veritabanını başlat (eğer henüz başlatılmadıysa)
     await initDatabase();
+
+    // Kayıt sahibi kontrolü (müşteri hizmetleri sadece kendi kayıtlarını, admin tüm kayıtları silebilir)
+    const kayitCheck = await db.execute({
+      sql: "SELECT user_id FROM sorunlu_kargolar WHERE id = ?",
+      args: [sorunluKargoId],
+    });
+
+    if (kayitCheck.rows.length === 0) {
+      return NextResponse.json(
+        { success: false, error: "Kayıt bulunamadı" },
+        { status: 404 }
+      );
+    }
+
+    const kayit = kayitCheck.rows[0] as any;
+    const isMusteriHizmetleri = user.username === "müsterihizmetleri@verarkargo.com";
+    
+    // Admin tüm kayıtları silebilir, müşteri hizmetleri sadece kendi kayıtlarını silebilir
+    if (user.role === "kurye") {
+      if (!isMusteriHizmetleri) {
+        return NextResponse.json(
+          { success: false, error: "Yetkisiz erişim" },
+          { status: 403 }
+        );
+      }
+      if (kayit.user_id !== user.id) {
+        return NextResponse.json(
+          { success: false, error: "Sadece kendi kayıtlarınızı silebilirsiniz" },
+          { status: 403 }
+        );
+      }
+    }
 
     // Transaction başlat
     const transaction = await db.transaction();

@@ -154,20 +154,36 @@ export default function IadeKargoListesi({ user }: IadeKargoListesiProps) {
     if (baslangicSaati) {
       filtered = filtered.filter((t) => {
         const tarih = new Date(t.created_at);
-        const saat = tarih.getHours() * 60 + tarih.getMinutes();
+        // Türkiye saatine göre saat ve dakika al
+        const turkiyeSaati = tarih.toLocaleString("tr-TR", {
+          timeZone: "Europe/Istanbul",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        });
+        const [saat, dakika] = turkiyeSaati.split(":").map(Number);
+        const toplamDakika = saat * 60 + dakika;
         const [baslangicSaat, baslangicDakika] = baslangicSaati.split(":").map(Number);
         const baslangicZaman = baslangicSaat * 60 + baslangicDakika;
-        return saat >= baslangicZaman;
+        return toplamDakika >= baslangicZaman;
       });
     }
 
     if (bitisSaati) {
       filtered = filtered.filter((t) => {
         const tarih = new Date(t.created_at);
-        const saat = tarih.getHours() * 60 + tarih.getMinutes();
+        // Türkiye saatine göre saat ve dakika al
+        const turkiyeSaati = tarih.toLocaleString("tr-TR", {
+          timeZone: "Europe/Istanbul",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        });
+        const [saat, dakika] = turkiyeSaati.split(":").map(Number);
+        const toplamDakika = saat * 60 + dakika;
         const [bitisSaat, bitisDakika] = bitisSaati.split(":").map(Number);
         const bitisZaman = bitisSaat * 60 + bitisDakika;
-        return saat <= bitisZaman;
+        return toplamDakika <= bitisZaman;
       });
     }
 
@@ -235,7 +251,8 @@ export default function IadeKargoListesi({ user }: IadeKargoListesiProps) {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("tr-TR", {
+    return date.toLocaleString("tr-TR", {
+      timeZone: "Europe/Istanbul",
       day: "2-digit",
       month: "2-digit",
       year: "numeric",

@@ -158,6 +158,7 @@ export default function SorunluKargoAdminListesi({ user }: SorunluKargoAdminList
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("tr-TR", {
+      timeZone: "Europe/Istanbul",
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -272,38 +273,38 @@ export default function SorunluKargoAdminListesi({ user }: SorunluKargoAdminList
               Henüz sorunlu kargo kaydı bulunmamaktadır.
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
+            <div className="overflow-x-auto -mx-6 px-6">
+              <table className="w-full min-w-[1200px]">
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-200">
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                      BARKOD NO
+                    <th className="px-2 py-2 text-left text-sm font-semibold text-gray-700 w-24">
+                      KOD
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-2 py-2 text-left text-sm font-semibold text-gray-700 w-28">
                       ÇIKIŞ NO
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-2 py-2 text-left text-sm font-semibold text-gray-700 w-24">
                       TAŞIYICI
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-2 py-2 text-left text-sm font-semibold text-gray-700 w-32">
                       GÖNDERİCİ
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-2 py-2 text-left text-sm font-semibold text-gray-700 w-28">
                       ALICI
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-2 py-2 text-left text-sm font-semibold text-gray-700 w-48">
                       AÇIKLAMA
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-2 py-2 text-left text-sm font-semibold text-gray-700 w-24">
                       DURUM
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-2 py-2 text-left text-sm font-semibold text-gray-700 w-28">
                       OLUŞTURAN
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-2 py-2 text-left text-sm font-semibold text-gray-700 w-24">
                       TARİH
                     </th>
-                    <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">
+                    <th className="px-2 py-2 text-center text-sm font-semibold text-gray-700 w-32">
                       İŞLEMLER
                     </th>
                   </tr>
@@ -311,17 +312,21 @@ export default function SorunluKargoAdminListesi({ user }: SorunluKargoAdminList
                 <tbody className="divide-y divide-gray-200">
                   {sorunluKargolar.map((kargo) => (
                     <tr key={kargo.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-700">{kargo.barkod_no}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{kargo.cikis_no}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{kargo.tasiyici_firma}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{kargo.gonderici_firma}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{kargo.alici_adi}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700 max-w-xs truncate">
+                      <td className="px-2 py-2 text-sm text-gray-700 font-mono">{kargo.barkod_no}</td>
+                      <td className="px-2 py-2 text-sm text-gray-700 font-mono">{kargo.cikis_no}</td>
+                      <td className="px-2 py-2 text-sm text-gray-700">{kargo.tasiyici_firma}</td>
+                      <td className="px-2 py-2 text-sm text-gray-700 truncate" title={kargo.gonderici_firma}>
+                        {kargo.gonderici_firma}
+                      </td>
+                      <td className="px-2 py-2 text-sm text-gray-700 truncate" title={kargo.alici_adi}>
+                        {kargo.alici_adi}
+                      </td>
+                      <td className="px-2 py-2 text-sm text-gray-700 truncate max-w-[200px]" title={kargo.aciklama}>
                         {kargo.aciklama}
                       </td>
-                      <td className="px-4 py-3 text-sm">
+                      <td className="px-2 py-2 text-sm">
                         <span
-                          className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          className={`px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap ${
                             kargo.durum === "Yeni Kayıt"
                               ? "bg-orange-100 text-orange-800"
                               : kargo.durum === "İşlemde"
@@ -336,37 +341,39 @@ export default function SorunluKargoAdminListesi({ user }: SorunluKargoAdminList
                           {kargo.durum}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
+                      <td className="px-2 py-2 text-sm text-gray-700">
                         <div className="flex items-center gap-1">
-                          <span>👤</span>
-                          {kargo.kullanici_name}
+                          <span className="text-sm">👤</span>
+                          <span className="truncate max-w-[100px]" title={kargo.kullanici_name}>
+                            {kargo.kullanici_name}
+                          </span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
+                      <td className="px-2 py-2 text-sm text-gray-700">
                         <div className="flex items-center gap-1">
-                          <span>📅</span>
+                          <span className="text-sm">📅</span>
                           {formatDate(kargo.created_at)}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-center">
-                        <div className="flex items-center justify-center gap-2">
+                      <td className="px-2 py-2 text-center">
+                        <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => router.push(`/admin/sorunlu/detay/${kargo.id}`)}
-                            className="text-green-600 hover:text-green-800 font-semibold"
+                            className="text-green-600 hover:text-green-800 text-base"
                             title="Görüntüle"
                           >
                             👁️
                           </button>
                           <button
                             onClick={() => setDurumGuncelleId(kargo.id)}
-                            className="text-purple-600 hover:text-purple-800 font-semibold"
+                            className="text-purple-600 hover:text-purple-800 text-base"
                             title="Durum Güncelle"
                           >
                             🔄
                           </button>
                           <button
                             onClick={() => setDuzenleId(kargo.id)}
-                            className="text-blue-600 hover:text-blue-800 font-semibold"
+                            className="text-blue-600 hover:text-blue-800 text-base"
                             title="Kayıt Düzenle"
                           >
                             ✏️
@@ -374,7 +381,7 @@ export default function SorunluKargoAdminListesi({ user }: SorunluKargoAdminList
                           <button
                             onClick={() => handleDelete(kargo.id)}
                             disabled={deletingId === kargo.id}
-                            className="text-red-600 hover:text-red-800 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="text-red-600 hover:text-red-800 text-base disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Sil"
                           >
                             {deletingId === kargo.id ? "⏳" : "🗑️"}

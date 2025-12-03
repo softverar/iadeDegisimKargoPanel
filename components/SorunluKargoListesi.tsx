@@ -38,6 +38,7 @@ export default function SorunluKargoListesi({ user }: SorunluKargoListesiProps) 
   const [searchTerm, setSearchTerm] = useState("");
   const [durumGuncelleId, setDurumGuncelleId] = useState<number | null>(null);
   const [duzenleId, setDuzenleId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   useEffect(() => {
     loadSorunluKargolar();
@@ -83,9 +84,36 @@ export default function SorunluKargoListesi({ user }: SorunluKargoListesiProps) 
     setSorunluKargolar(filtered);
   };
 
+  const handleDelete = async (id: number) => {
+    if (!confirm("Bu kaydı silmek istediğinizden emin misiniz?")) {
+      return;
+    }
+
+    setDeletingId(id);
+    try {
+      const response = await apiFetch(`/api/sorunlu-kargolar/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        await loadSorunluKargolar();
+      } else {
+        alert(data.error || "Silme işlemi başarısız");
+      }
+    } catch (error) {
+      console.error("Error deleting:", error);
+      alert("Silme işlemi sırasında bir hata oluştu");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("tr-TR", {
+      timeZone: "Europe/Istanbul",
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -212,6 +240,16 @@ export default function SorunluKargoListesi({ user }: SorunluKargoListesiProps) 
                           className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-semibold"
                         >
                           ✏️ Düzenle
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(kargo.id);
+                          }}
+                          disabled={deletingId === kargo.id}
+                          className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {deletingId === kargo.id ? "⏳ Siliniyor..." : "🗑️ Sil"}
                         </button>
                       </>
                     )}
